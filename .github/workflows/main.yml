@@ -1,36 +1,31 @@
-# This is a basic workflow to help you get started with Actions
+name: Sync GitHub to S3
 
-name: CI
-
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches:
+    - main
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  deploy:
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
+    - name: Checkout repo
+      uses: actions/checkout@v1
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+    - name: Set Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ASIAVJCW7LIIG7C5FOFW
+        aws-secret-access-key: If65UpdtHQf+9xL/rFrIN8ncl42R/G5ujHpsP5yp
+        aws-session-token: FwoGZXIvYXdzEPz//////////wEaDLjFpFTgZF+LwHjb1yK+AcQvG952InQL2KlaqogTfYTnzCwYqwSmf8b6U5ct5uaN1g8IhHqhMT5v+Sm7CrNGOavbZLGOD1O5EWBpT6YDfbH9MDWABLOQsTo/p+rCvT/FLOntuhVn3WpKpa46O2V4XGxs6HhASvycoerdCRB/eVxxBLkUBTV5S77DI2f272FGcv1W/FGZcfFj/ruoNKuzAYkLI3ogDGcX1zJ97lJ/i/2MDbxKBW2IOkoB4EJILV1CjejvWZqog8JWQYsRHpQo5PeJmAYyLc4YCuaCbBy+6IahJcTyoPD2H6d6EvppSBDk88cC9Ox8FqHGkp8LcQW+dNQwFA==
+        aws-region: us-east-1
+
+    - name: Deploy objects to S3 bucket
+      run: |
+        aws s3 sync ./ s3://bucket-aws-s3-felipe-duran \
+        --exclude '.git/*' \
+        --exclude '.github/*' \
+        --exclude 'README.md' \
+        --follow-symlinks \
+        --delete
